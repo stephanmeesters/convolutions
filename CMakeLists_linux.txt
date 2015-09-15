@@ -1,0 +1,59 @@
+cmake_minimum_required(VERSION 2.8)
+
+PROJECT(Convolutions)
+
+LIST(APPEND
+CMAKE_MODULE_PATH "${CMAKE_SOURCE_PREFIX}")
+set(CMAKE_MODULE_PATH
+${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} lib)
+
+
+  include_directories(/home/smeesters/SP/libnifti/usr/include/)
+
+
+
+
+find_package(zlib)
+include_directories(${ZLIB_INCLUDE_DIR})
+
+file(GLOB CXX_FILES *.cxx)
+file(GLOB H_FILES *.h)
+
+if (APPLE)
+  add_executable(Convolutions MACOSX_BUNDLE ${CXX_FILES} ${H_FILES})
+else()
+  add_executable(Convolutions ${CXX_FILES} ${H_FILES})
+endif()
+
+target_link_libraries(Convolutions /home/smeesters/SP/libnifti/usr/libniftiio.a /home/smeesters/SP/libnifti/usr/lib/libznz.a /home/smeesters/SP/libnifti/usr/libnifticdf.a /home/smeesters/SP/libnifti/usr/lib/libfslio.a ${ZLIB_LIBRARY})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
