@@ -19,6 +19,11 @@
 #include "nifti1.h"
 #include "nifti1_io.h"
 
+/** Includes OpenMP */
+#ifdef __linux__
+#include "omp.h"
+#endif
+
 int main(int argc, const char * argv[])
 {
     try
@@ -78,6 +83,13 @@ int main(int argc, const char * argv[])
                                               1,
                                               "Save-Iterations");
         
+        TCLAP::ValueArg<int> param_numthreads("",
+                                                  "numthreads",
+                                                  "Number of threads for parallel processing. Default=max",
+                                                  false,
+                                                  0,
+                                                  "Num Threads");
+        
 
         TCLAP::SwitchArg param_verbose("","verbose","Verbose mode",false);
         
@@ -90,9 +102,19 @@ int main(int argc, const char * argv[])
         cmd.add( param_iterations );
         cmd.add( param_padding );
         cmd.add( param_saveiterations );
+        cmd.add( param_numthreads );
 
         // Parse the args.
         cmd.parse( argc, argv );
+        
+        // Configure OpenMP multithreading (only available with GCC in Linux)
+#ifdef __linux__
+        if(param_numthreads.getValue() != 0)
+        {
+            omp_set_dynamic(0);     // Explicitly disable dynamic teams
+            omp_set_num_threads(param_numthreads.getValue()); // Nr of threads for all consecutive parallel regions
+        }
+#endif
         
         // Initialize kernel, calculate it or load it
         Kernel* kernel = new Kernel(param_d33.getValue(),
@@ -177,12 +199,12 @@ int main(int argc, const char * argv[])
                 break;
             }
                 
-//            case DT_UINT32:         // "UnsignedInteger32"
+//            case DT_UINT32:         // "UnsignedInteger32" -- not supported by GCC 4.4.7 used on the BigMath2
 //            {
 //                Convolution<uint32_t>* convolution = new Convolution<uint32_t>(kernel,
 //                                                                         path_dsf.getValue(),
 //                                                                         path_output.getValue(),
-//                                                                         param_iterations.getValue(),
+//                                                                         param_iterations.g.etValue(),
 //                                                                         param_padding.getValue(),
 //                                                                         param_saveiterations.getValue());
 //                free(convolution);
